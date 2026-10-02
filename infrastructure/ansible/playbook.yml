@@ -1,0 +1,60 @@
+---
+- name: Configure GCP Web Servers
+  hosts: webservers
+  become: yes
+
+  vars_files:
+    - vars/packages.yml
+
+  handlers:
+    - name: Restart Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+
+  tasks:
+
+    - name: Install required packages
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop: "{{ packages }}"
+
+    - name: Create website
+      ansible.builtin.copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>{{ website_title }}</title>
+          </head>
+          <body>
+              <h1>{{ website_title }}</h1>
+              <p>Environment: {{ environment }}</p>
+              <p>Server: {{ inventory_hostname }}</p>
+              <p>Nginx Port: {{ nginx_port }}</p>
+              <p>Managed by Ansible</p>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      notify: Restart Nginx
+
+    - name: Ensure Nginx is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Check Nginx service status
+      ansible.builtin.command: systemctl is-active nginx
+      register: nginx_status
+      changed_when: false
+
+    - name: Display Nginx status
+      ansible.builtin.debug:
+        var: nginx_status.stdout
+

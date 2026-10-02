@@ -1,0 +1,7 @@
+[webservers]
+web1 ansible_host=34.10.250.255
+web2 ansible_host=34.63.155.27
+
+[webservers:vars]
+ansible_user=sasikala_bedre_gmail_com
+ansible_ssh_private_key_file=~/.ssh/google_compute_engine

@@ -1,0 +1,3 @@
+nginx_port: 80
+website_title: "DevOps GCP Automation"
+environment: "development"
